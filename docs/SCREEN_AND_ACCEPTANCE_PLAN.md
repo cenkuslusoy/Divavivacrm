@@ -86,3 +86,13 @@ Shopify Admin içinde ana menü:
 - Yayınlama resmi Meta API üzerinden yapılır; API zamanlama yapmadığı için yayın saatini DivaViva yönetir.
 - Takvimde taslak, onay bekliyor, planlandı, yayınlanıyor, yayınlandı ve hata durumları görünür.
 - Ayrıntılı teknik kapsam ve kabul kriterleri docs/INSTAGRAM_PUBLISHING.md dosyasındadır.
+
+
+## Otomatik kargo ve ürün etiketi baskısı
+
+- Sipariş geldiğinde pazaryerinin/taşıyıcının oluşturduğu orijinal kargo etiketi baskı kuyruğuna alınır.
+- Ürün adı, varyant, SKU ve adet bilgilerini içeren ayrı ürün etiketi hazırlanır.
+- İki etiket aynı yazıcıdan art arda otomatik basılabilir; kargo barkodu hiçbir zaman ürün bilgisiyle kapatılmaz.
+- Baskı kuyruğu, yazıcı durumu, hata ve yeniden baskı geçmişi gösterilir.
+- Tarayıcıdan sessiz otomatik baskı için bilgisayarda yerel baskı ajanı veya desteklenen ağ yazıcısı köprüsü gerekir.
+- Ayrıntılı kapsam docs/LABEL_PRINTING.md dosyasındadır.
