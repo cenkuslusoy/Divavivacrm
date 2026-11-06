@@ -72,3 +72,17 @@ Shopify Admin içinde ana menü:
 3. Trendyol ürün/varyant eşleştirme ve kanal fiyatı.
 4. Hepsiburada ürün/varyant eşleştirme ve kanal fiyatı.
 5. Sipariş/stok senkronizasyonu, hata kuyruğu ve operasyon raporu.
+
+## Instagram içerik takvimi
+
+- Ana menüye Instagram Takvimi eklenir.
+- Instagram Business/Creator hesabı Meta OAuth ile bağlanır; şifre istenmez.
+- Yeni Shopify ürünü için AI destekli görsel/caption/hashtag taslağı oluşturulur.
+- Taslak haftalık yayın takvimindeki sıradaki uygun slota yerleştirilir.
+- İlk kurulumda onay zorunludur; kullanıcı ayrıca açarsa kurallara uyan içerikler otomatik yayınlanabilir.
+- Kullanıcı hafta/gün/saat, saat dilimi, günlük paylaşım limiti, kategori/stok filtreleri ve tekrar paylaşım aralığını belirler.
+- İlk sürüm tek görsel ve carousel feed gönderilerini kapsar; Reels/Story sonraki fazdır.
+- Planlı yayın, uygulamanın sunucu tarafındaki queue/worker sistemiyle yapılır; tarayıcı veya telefon açık kalmak zorunda değildir.
+- Yayınlama resmi Meta API üzerinden yapılır; API zamanlama yapmadığı için yayın saatini DivaViva yönetir.
+- Takvimde taslak, onay bekliyor, planlandı, yayınlanıyor, yayınlandı ve hata durumları görünür.
+- Ayrıntılı teknik kapsam ve kabul kriterleri docs/INSTAGRAM_PUBLISHING.md dosyasındadır.
