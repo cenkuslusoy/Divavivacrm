@@ -109,3 +109,16 @@ Shopify Admin içinde ana menü:
 - İleri fazda kutu adresine bağlı LED, toplama sırası geldiğinde yanar; ürün alınıp onaylanınca söner.
 - LED bağlantısı kesilse bile dijital toplama listesi çalışmayı sürdürür.
 - Ayrıntılı kapsam docs/WAREHOUSE_PICKING.md dosyasındadır.
+
+
+## AI Merkezi ve maliyet optimizasyonu
+
+- Ana menüye AI Merkezi eklenir.
+- Gemini, OpenAI ve Canva gibi sağlayıcılar ortak adapter katmanından kullanılır.
+- Görev türüne göre model seçimi, birincil/yedek sağlayıcı ve kalite/maliyet profili ayarlanır.
+- AI çağrılarının token/görsel kullanımı ve tahmini maliyeti kaydedilir.
+- Günlük/aylık, sağlayıcı/model/modül/ürün bazında maliyet raporu sunulur.
+- Aylık bütçe, sağlayıcı limitleri, uyarı eşikleri ve bütçe aşım davranışı ayarlanır.
+- Ürün görsellerinde orijinal dosya korunur; AI türevleri ayrı kaydedilir ve katalog görseli olmadan önce onaylanır.
+- Canva marka şablonları Autofill ile ürün bilgileri ve görsellerle doldurulabilir.
+- Ayrıntılı mimari docs/AI_PROVIDER_AND_COSTS.md dosyasındadır.
