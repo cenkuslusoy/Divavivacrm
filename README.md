@@ -14,7 +14,7 @@ npm run dev
 ```
 
 ## Shopify bağlantısı
-Mağaza bağlantısı `.env.local` içinde sunucu tarafı ortam değişkenleriyle yapılandırılır. `SHOPIFY_ADMIN_ACCESS_TOKEN` gizlidir; asla GitHub'a commit etmeyin, tarayıcıya göndermeyin veya sohbette paylaşmayın. Gerekli erişimler ürün oluşturma ve ürün medyası yükleme izinleriyle sınırlandırılmalıdır.
+Mağaza bağlantısı sunucu tarafı ortam değişkenleriyle yapılandırılır. Kurulum için [Shopify bağlantı rehberine](docs/shopify-setup.md) bakın. `SHOPIFY_ADMIN_ACCESS_TOKEN` gizlidir; asla GitHub'a commit etmeyin, tarayıcıya göndermeyin veya sohbette paylaşmayın.
 
 ## Mevcut durum
 İlk CRM arayüz prototipi GitHub'a eklendi. Ürün taslakları şu anda tarayıcı belleğinde tutulur; Shopify'a ürün oluşturma ve fotoğraf gönderme bağlantısı henüz etkin değildir. Shopify Admin API bağlantısı kurulup güvenli şekilde test edildikten sonra CRM'den ürün sayfası oluşturma akışı bağlanacaktır.
