@@ -96,3 +96,16 @@ Shopify Admin içinde ana menü:
 - Baskı kuyruğu, yazıcı durumu, hata ve yeniden baskı geçmişi gösterilir.
 - Tarayıcıdan sessiz otomatik baskı için bilgisayarda yerel baskı ajanı veya desteklenen ağ yazıcısı köprüsü gerekir.
 - Ayrıntılı kapsam docs/LABEL_PRINTING.md dosyasındadır.
+
+
+## Günlük kargolama ve depo toplama ekranı
+
+- Gönderime hazır tüm siparişler tek günlük kargolama panosunda toplanır.
+- Sipariş bazlı görünüm ürün görseli, varyant, SKU, adet, depo raf/kutu adresi ve toplama durumunu gösterir.
+- Toplu toplama görünümü aynı SKU/varyant miktarlarını birleştirir ve depo lokasyonuna göre rota sıralaması yapar.
+- Personel barkod okutarak doğru ürün ve miktarı doğrular; eksik/yanlış ürün uyarısı alır.
+- Toplanan ürünler sipariş bazında ayrıştırılır, paketlenir ve etiket baskı kuyruğuna geçer.
+- Depo adresleme hiyerarşisi depo/alan/raf/bölme/kutu şeklindedir.
+- İleri fazda kutu adresine bağlı LED, toplama sırası geldiğinde yanar; ürün alınıp onaylanınca söner.
+- LED bağlantısı kesilse bile dijital toplama listesi çalışmayı sürdürür.
+- Ayrıntılı kapsam docs/WAREHOUSE_PICKING.md dosyasındadır.
