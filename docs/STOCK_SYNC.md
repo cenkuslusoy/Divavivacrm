@@ -31,9 +31,9 @@ Yeni Shopify ürünü/varyantı oluştuğunda:
 
 ## Ortak stok havuzu ve güvenlik stoğu
 
-Varsayılan öneri: web, Trendyol ve Hepsiburada aynı fiziksel stok havuzundan satış yapar. Her varyant için Shopify'daki kullanılabilir stok merkezi miktar kabul edilir.
+**Karar: Ortak fiziksel stok havuzu kullanılacak.** Web, Trendyol ve Hepsiburada aynı fiziksel stoktan satış yapar; kanallara birbirinden bağımsız stok kopyaları tahsis edilmez. Her varyant için Shopify'daki kullanılabilir stok merkezi miktar kabul edilir. Pazaryeri siparişi geldiğinde bu sipariş Shopify merkez stoğuna bir kez işlenir; ardından yeni toplam kullanılabilir miktar tüm kanallara mutlak hedef değer olarak gönderilir.
 
-Her kanal için opsiyonel güvenlik stoğu tanımlanabilir. Örnek:
+Her kanal için opsiyonel güvenlik stoğu tanımlanabilir. İlk kurulumda güvenlik stoğu 0 olarak başlar; kullanıcı kanal bazında tampon miktarı belirleyebilir. Güvenlik stoğu fiziksel stoktan ayrı bir satış tahsisidir ve ortak havuzdan düşülerek kanala gönderilecek miktarı belirler. Örnek:
 - Fiziksel/Shopify kullanılabilir stok: 20
 - Trendyol güvenlik stoğu: 1
 - Hepsiburada güvenlik stoğu: 1
