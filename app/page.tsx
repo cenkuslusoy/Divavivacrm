@@ -63,7 +63,7 @@ export default function Home() {
     setFiles([]);
     setStep(2);
   }
-  function updateDraft(id: string, key: keyof Draft, value: string) {
+  function updateDraft<K extends keyof Draft>(id: string, key: K, value: Draft[K]) {
     setDrafts(prev => prev.map(d => d.id === id ? { ...d, [key]: value } : d));
   }
 
