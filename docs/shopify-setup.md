@@ -6,7 +6,7 @@ CRM, ana ürün kaynağı olarak Shopify mağazasını kullanır. CRM'den oluşt
 
 1. Shopify yöneticisinde **Settings → Apps and sales channels → Develop apps** bölümünü açın. (İlk kullanımda özel uygulama geliştirmeyi etkinleştirmeniz istenebilir.)
 2. **Create an app** ile örneğin `DivaViva CRM` adında uygulama oluşturun.
-3. **Configuration → Admin API integration** bölümünde yalnızca gerekli kapsamı etkinleştirin: `write_products`. Ürünleri CRM'de listeleme/okuma özelliği eklendiğinde `read_products` de gerekecek.
+3. **Configuration → Admin API integration** bölümünde yalnızca gerekli kapsamı etkinleştirin: `read_products`, `write_products` ve `write_files`. Shopify ürün medya yönetimi bu izinleri gerektirir.
 4. Uygulamayı **Install app** ile mağazaya kurun.
 5. Admin API access token'ı alın. Bu token bir parola gibi gizlidir.
 
