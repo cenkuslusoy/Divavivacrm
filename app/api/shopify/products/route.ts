@@ -39,7 +39,7 @@ async function stageImage(file: File, productCode: string, index: number) {
       stagedTargets { url resourceUrl parameters { name value } }
       userErrors { message }
     }
-  }`, { input: [{ resource: "IMAGE", filename, mimeType: file.type, httpMethod: "POST" }] });
+  }`, { input: [{ resource: "PRODUCT_IMAGE", filename, mimeType: file.type, httpMethod: "POST" }] });
   const result = staged.stagedUploadsCreate;
   if (result.userErrors.length || !result.stagedTargets[0]) throw new Error(result.userErrors.map(e => e.message).join("; ") || "Shopify görsel yükleme adresi oluşturulamadı.");
   const target = result.stagedTargets[0];
