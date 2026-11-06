@@ -47,6 +47,10 @@ Uygulama DB'sindeki kayıtlar Shopify ürününün yerine geçmez; Shopify GID i
 
 Shopify web fiyatı ve stok için ana kaynak olur. Trendyol/Hepsiburada fiyatları kanal bazında farklı olabileceği için Shopify varyant fiyatını ezmek yerine uygulama DB'sinde kanal fiyatı tutulur; marketplace API'lerine bu fiyat gönderilir. Stokta ortak havuz yaklaşımı seçilirse Shopify inventory seviyeleri baz alınır ve her pazaryerine güvenli rezerv/yeniden deneme kurallarıyla yansıtılır.
 
+## Otomatik stok senkronizasyonu
+
+Stok akışının ayrıntılı tasarımı [STOCK_SYNC.md](STOCK_SYNC.md) dosyasındadır. Özet karar: Shopify merkezli ortak stok havuzu, SKU/barkod ile güvenilir varyant eşleştirme, olay tabanlı hızlı güncelleme ve kullanıcı seçimine göre saatlik/3 saatlik periyodik mutabakat. Pazaryeri siparişleri de aynı stok havuzuna işlenir; sipariş olayları idempotent olmalıdır.
+
 ## Güvenilirlik kuralları
 
 - Ürün kodu/SKU benzersiz olmalı.
