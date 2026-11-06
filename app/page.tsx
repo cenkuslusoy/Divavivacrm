@@ -7,8 +7,8 @@ import {
   Sparkles, Store, Upload, X, Boxes, Clock3, AlertCircle
 } from "lucide-react";
 
-type Photo = { id: string; name: string; url: string };
-type Draft = { id: string; name: string; category: string; photos: Photo[]; variants: string[]; status: "Hazır" | "Kontrol gerekli"; webPrice: string; trendyolPrice: string; hbPrice: string; stock: string; description: string; material: string; keywords: string };
+type Photo = { id: string; name: string; url: string; file: File };
+type Draft = { id: string; name: string; category: string; photos: Photo[]; variants: string[]; status: "Hazır" | "Kontrol gerekli"; webPrice: string; trendyolPrice: string; hbPrice: string; stock: string; description: string; material: string; keywords: string; shopifyId?: string };
 
 const seedDrafts: Draft[] = [
   { id: "DV-0001", name: "İnci Detaylı Gold Küpe", category: "Küpe", photos: [], variants: ["Gold", "Silver", "Rose"], status: "Hazır", webPrice: "", trendyolPrice: "", hbPrice: "", stock: "10", description: "Zarif inci detayıyla günlük ve özel kombinlere eşlik eden zamansız tasarım.", material: "Pirinç üzeri gold kaplama · sentetik inci (doğrulanmalı)", keywords: "inci küpe, gold küpe, kadın küpe, zarif takı" },
@@ -25,44 +25,67 @@ export default function Home() {
   const [stock, setStock] = useState("10");
   const [step, setStep] = useState(1);
   const [query, setQuery] = useState("");
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);\n  const [shopifyMessage, setShopifyMessage] = useState("");\n  const [creating, setCreating] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const visibleDrafts = useMemo(() => drafts.filter(d => d.name.toLocaleLowerCase("tr").includes(query.toLocaleLowerCase("tr")) || d.id.toLowerCase().includes(query.toLowerCase())), [drafts, query]);
 
   function addFiles(list: FileList | null) {
     if (!list) return;
-    const incoming = Array.from(list).filter(f => f.type.startsWith("image/")).map(file => ({ id: crypto.randomUUID(), name: file.name, url: URL.createObjectURL(file) }));
+    const incoming = Array.from(list).filter(f => f.type.startsWith("image/")).map(file => ({ id: crypto.randomUUID(), name: file.name, url: URL.createObjectURL(file), file }));
     setFiles(prev => [...prev, ...incoming]);
   }
-  function createDrafts() {
-    if (!files.length) return;
+  async function createDrafts() {
+    if (!files.length || creating) return;
+    setCreating(true);
+    setShopifyMessage("");
     const groups: Photo[][] = [];
     files.forEach((photo, index) => {
       const groupIndex = Math.floor(index / 2);
       if (!groups[groupIndex]) groups[groupIndex] = [];
       groups[groupIndex].push(photo);
     });
-    const created = groups.map((photos, i): Draft => ({
-      id: `DV-${String(drafts.length + i + 1).padStart(4, "0")}`,
-      name: `Yeni ürün ${drafts.length + i + 1}`,
-      category: "Kategori seç",
-      photos,
-      variants: ["Varsayılan"],
-      status: "Kontrol gerekli",
-      webPrice: prices.web,
-      trendyolPrice: prices.trendyol,
-      hbPrice: prices.hb,
-      stock,
-      description: "AI ürün açıklaması oluşturulacak. Ürün özellikleri fotoğraflardan doğrulanmalı.",
-      material: "Malzeme bilgisi doğrulanmalı",
-      keywords: "ürün, aksesuar, DivaViva"
-    }));
-    setDrafts(prev => [...prev, ...created]);
-    setSelected(created.map(d => d.id));
-    setFiles([]);
-    setStep(2);
+    const created: Draft[] = [];
+    try {
+      for (let i = 0; i < groups.length; i++) {
+        const photos = groups[i];
+        const productCode = `DV-${String(drafts.length + i + 1).padStart(4, "0")}`;
+        const productName = `Yeni ürün ${drafts.length + i + 1}`;
+        const description = "Ürün özellikleri ve malzeme bilgileri yayın öncesinde doğrulanmalıdır.";
+        const form = new FormData();
+        form.append("title", productName);
+        form.append("productCode", productCode);
+        form.append("descriptionHtml", `<p>${description}</p>`);
+        form.append("productType", "Aksesuar");
+        form.append("tags", "DivaViva, yeni ürün");
+        if (prices.web) form.append("price", prices.web);
+        photos.forEach(photo => form.append("photos", photo.file, photo.name));
+        const response = await fetch("/api/shopify/products", { method: "POST", body: form });
+        const result = await response.json();
+        if (!response.ok && response.status !== 207) throw new Error(result.error || "Shopify ürün kaydı başarısız.");
+        created.push({
+          id: productCode, name: productName, category: "Kategori seç", photos, variants: ["Varsayılan"],
+          status: "Kontrol gerekli", webPrice: prices.web, trendyolPrice: prices.trendyol, hbPrice: prices.hb,
+          stock, description, material: "Malzeme bilgisi doğrulanmalı", keywords: "ürün, aksesuar, DivaViva",
+          shopifyId: result.product?.id
+        });
+      }
+      setDrafts(prev => [...prev, ...created]);
+      setSelected(created.map(d => d.id));
+      setFiles([]);
+      setStep(2);
+      setShopifyMessage(`${created.length} ürün Shopify mağazasında taslak olarak oluşturuldu.`);
+    } catch (error) {
+      setShopifyMessage(error instanceof Error ? error.message : "Ürünler Shopify'a gönderilemedi.");
+      if (created.length) {
+        setDrafts(prev => [...prev, ...created]);
+        setSelected(created.map(d => d.id));
+      }
+    } finally {
+      setCreating(false);
+    }
   }
+
   function updateDraft<K extends keyof Draft>(id: string, key: K, value: Draft[K]) {
     setDrafts(prev => prev.map(d => d.id === id ? { ...d, [key]: value } : d));
   }
@@ -111,7 +134,7 @@ export default function Home() {
                 <div className="price-grid">{[{ key: "web", label: "Web sitesi", icon: Store }, { key: "trendyol", label: "Trendyol", icon: ShoppingBag }, { key: "hb", label: "Hepsiburada", icon: Package }].map(p => <label className="field" key={p.key}><span>{p.label}</span><div className="input-wrap"><span>₺</span><input value={prices[p.key as keyof typeof prices]} onChange={e => setPrices(prev => ({ ...prev, [p.key]: e.target.value }))} placeholder="0,00" inputMode="decimal"/></div></label>)}</div>
                 <label className="field stock-field"><span>Başlangıç stok miktarı</span><div className="input-wrap"><input value={stock} onChange={e => setStock(e.target.value)} inputMode="numeric"/><span>adet</span></div></label>
               </section>
-              <div className="bottom-actions"><span><AlertCircle size={15}/> Fotoğraflar taslak oluşturmak için yeterli.</span><button className="primary-button" onClick={createDrafts} disabled={!files.length}>Taslakları oluştur <ArrowRight size={17}/></button></div>
+              {shopifyMessage && <div className="shopify-feedback" role="status">{shopifyMessage}</div>}\n              <div className="bottom-actions"><span><AlertCircle size={15}/> Ürünler Shopify’da taslak olarak oluşturulur.</span><button className="primary-button" onClick={createDrafts} disabled={!files.length || creating}>{creating ? "Shopify’a gönderiliyor..." : "Shopify taslağı oluştur"} <ArrowRight size={17}/></button></div>
             </div>
 
             <aside className="side-column">
@@ -124,7 +147,7 @@ export default function Home() {
             <div className="draft-heading"><div><div className="eyebrow">ÇALIŞMA ALANI</div><h2>Ürün taslakları <span>{drafts.length}</span></h2><p>Oluşturulan ürünleri düzenle ve yayına hazırlık durumlarını kontrol et.</p></div><div className="draft-tools"><div className="search-box"><Search size={16}/><input placeholder="Ürün ara..." value={query} onChange={e => setQuery(e.target.value)}/></div><button className="secondary-button compact" onClick={() => setSelected(drafts.map(d => d.id))}>Tümünü seç</button></div></div>
             <div className="draft-table">
               <div className="table-head"><span>ÜRÜN</span><span>KATEGORİ / VARYANT</span><span>DURUM</span><span>İŞLEM</span></div>
-              {visibleDrafts.map(d => <div className="table-row" key={d.id}><div className="product-cell"><input type="checkbox" checked={selected.includes(d.id)} onChange={e => setSelected(prev => e.target.checked ? [...prev, d.id] : prev.filter(id => id !== d.id))}/><div className="product-placeholder"><ShoppingBag size={17}/></div><div><strong>{d.name}</strong><small>{d.id} · {d.photos.length} fotoğraf</small></div></div><div className="category-cell"><strong>{d.category}</strong><small>{d.variants.join(" · ")}</small></div><div><span className={d.status === "Hazır" ? "status ready" : "status review"}>{d.status}</span></div><div><button className="text-button" onClick={() => setEditing(editing === d.id ? null : d.id)}>{editing === d.id ? "Kapat" : "Düzenle"}</button></div></div>)}
+              {visibleDrafts.map(d => <div className="table-row" key={d.id}><div className="product-cell"><input type="checkbox" checked={selected.includes(d.id)} onChange={e => setSelected(prev => e.target.checked ? [...prev, d.id] : prev.filter(id => id !== d.id))}/><div className="product-placeholder"><ShoppingBag size={17}/></div><div><strong>{d.name}</strong><small>{d.id} · {d.photos.length} fotoğraf{d.shopifyId ? " · Shopify’a kaydedildi" : ""}</small></div></div><div className="category-cell"><strong>{d.category}</strong><small>{d.variants.join(" · ")}</small></div><div><span className={d.status === "Hazır" ? "status ready" : "status review"}>{d.status}</span></div><div><button className="text-button" onClick={() => setEditing(editing === d.id ? null : d.id)}>{editing === d.id ? "Kapat" : "Düzenle"}</button></div></div>)}
               {visibleDrafts.length === 0 && <div className="empty-state">Aramana uygun ürün bulunamadı.</div>}
             </div>
             {editing && drafts.filter(d => d.id === editing).map(d => <div className="editor" key={d.id}><div className="editor-head"><div><strong>{d.name}</strong><small>{d.id} · Ürün taslağı</small></div><button className="icon-button" onClick={() => setEditing(null)}><X size={17}/></button></div><div className="editor-grid"><label className="field"><span>Ürün adı</span><input value={d.name} onChange={e => updateDraft(d.id, "name", e.target.value)}/></label><label className="field"><span>Kategori</span><input value={d.category} onChange={e => updateDraft(d.id, "category", e.target.value)}/></label><label className="field"><span>Malzeme</span><input value={d.material} onChange={e => updateDraft(d.id, "material", e.target.value)}/></label><label className="field"><span>Renk varyantları</span><input value={d.variants.join(", ")} onChange={e => updateDraft(d.id, "variants", e.target.value.split(",").map(v => v.trim()))}/></label><label className="field full"><span>Ürün açıklaması</span><textarea value={d.description} onChange={e => updateDraft(d.id, "description", e.target.value)}/></label><label className="field full"><span>SEO anahtar kelimeleri</span><input value={d.keywords} onChange={e => updateDraft(d.id, "keywords", e.target.value)}/></label><label className="field"><span>Web fiyatı (₺)</span><input value={d.webPrice} onChange={e => updateDraft(d.id, "webPrice", e.target.value)}/></label><label className="field"><span>Trendyol fiyatı (₺)</span><input value={d.trendyolPrice} onChange={e => updateDraft(d.id, "trendyolPrice", e.target.value)}/></label><label className="field"><span>Hepsiburada fiyatı (₺)</span><input value={d.hbPrice} onChange={e => updateDraft(d.id, "hbPrice", e.target.value)}/></label><label className="field"><span>Stok</span><input value={d.stock} onChange={e => updateDraft(d.id, "stock", e.target.value)}/></label></div><div className="editor-foot"><span><AlertCircle size={14}/> Malzeme bilgilerini yayınlamadan önce doğrula.</span><button className="primary-button" onClick={() => setEditing(null)}><Check size={16}/> Değişiklikleri kaydet</button></div></div>)}
