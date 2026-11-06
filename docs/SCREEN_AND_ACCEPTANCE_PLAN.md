@@ -10,7 +10,7 @@ Shopify Admin içinde ana menü:
 4. Ürün kataloğu
 5. Stok ve fiyatlar
 6. Kanal bağlantıları
-7. Ayarlar
+7. Stok senkronizasyonu\n8. Ayarlar
 
 İlk sürümde 1–4 tamamlanır. Kanal bağlantıları ekranı Trendyol/Hepsiburada entegrasyonları gelene kadar bağlantı durumunu gösterir.
 
@@ -54,6 +54,16 @@ Shopify Admin içinde ana menü:
 - [ ] Shopify Admin'de aç bağlantısı çalışıyor.
 - [ ] Tekrarlanan istek aynı işlem için kopya ürün oluşturmuyor.
 - [ ] Başarılı ve başarısız kayıtlar kullanıcıya açıkça gösteriliyor.
+
+## Otomatik stok ve kanal senkronizasyonu
+
+- Yeni ürün/varyant SKU veya barkodla otomatik eşleştirme kontrolünden geçer.
+- Güvenilir tekil eşleşme otomatik bağlanır; belirsiz eşleşme kullanıcı onayı bekler.
+- Ortak stok havuzu Shopify inventory üzerinden yönetilir.
+- Shopify ve pazaryeri siparişleri tekilleştirilerek işlenir; çift stok düşümü engellenir.
+- Webhook/olay desteği olan kanallarda hızlı senkronizasyon, ayrıca saatlik/3 saatlik gibi seçilebilir periyotta mutabakat çalışır.
+- Kanal başına güvenlik stoğu, son başarılı çalışma, hata sayısı ve manuel yeniden deneme görünür.
+- Yeni ilanı otomatik açma ilk kurulumda kapalı olur; kullanıcı onayıyla açılır.
 
 ## Sonraki fazlar
 
