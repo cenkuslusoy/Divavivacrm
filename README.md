@@ -1,20 +1,41 @@
 # DivaViva Studio
 
-DivaViva için mobil öncelikli ürün hazırlama ve çok kanallı satış yönetim paneli.
+DivaViva için Shopify Admin içine gömülü ürün hazırlama ve çok kanallı satış operasyon uygulaması.
 
-## Hedef mimari
-- Ana ürün kataloğu ve ürün sayfaları: **divaviva.store (Shopify)**
-- CRM: ürün fotoğraflarını ve bilgilerini hazırlama, düzenleme ve mağazaya taslak ürün olarak gönderme merkezi.
-- Pazaryerleri: sonraki aşamada Shopify'daki ana ürün kaydından Trendyol ve Hepsiburada'ya aktarım.
+## Ürün mimarisi
 
-## Yerel geliştirme
+- **Ana katalog:** `divaviva.store` Shopify mağazası.
+- **Ürün medyası:** Shopify ürün medyası / Shopify CDN.
+- **DivaViva Studio:** Toplu fotoğraf yükleme, fotoğrafları ürün ve renk varyantlarına ayırma, AI içerik önerileri, fiyat/stok hazırlama ve Shopify taslak ürün oluşturma.
+- **Pazaryerleri:** Sonraki fazda Shopify ürün/variant kayıtlarından Trendyol ve Hepsiburada senkronizasyonu.
+
+Veri modeli ve akış için [ürün veri modeli](docs/PRODUCT_DATA_MODEL.md), Shopify embedded app geçişi için [mimari plan](docs/SHOPIFY_APP_MIGRATION.md) ve [kurulum rehberi](docs/shopify-setup.md) dosyalarına bakın.
+
+## Teknoloji kararı
+
+Mevcut Next.js ekranı ilk UI prototipidir. Gerçek Shopify uygulaması, Shopify'ın resmi **React Router app template** altyapısına taşınacaktır. Bu şablon Shopify Admin embedded arayüzü, App Bridge, oturum yönetimi ve doğrulanmış Admin GraphQL API erişimi sağlar.
+
+## Güvenlik notu
+
+Eski `app/api/shopify/products/route.ts` prototip endpoint'i kalıcı Admin API token'ı varsayar ve Shopify Admin oturumunu doğrulamaz. **Bu endpoint canlı mağazada kullanılmamalıdır.** Embedded uygulamaya geçişte `authenticate.admin(request)` ile doğrulanan route/action olarak yeniden yazılacaktır. Gerçek token veya secret GitHub'a commit edilmez.
+
+## Geliştirme
+
+Shopify CLI kurulu geliştirme bilgisayarında resmi şablon başlatılır:
+
 ```bash
-npm install
-npm run dev
+shopify app init --template=https://github.com/Shopify/shopify-app-template-react-router
+shopify app dev
 ```
 
-## Shopify bağlantısı
-Mağaza bağlantısı sunucu tarafı ortam değişkenleriyle yapılandırılır. Kurulum için [Shopify bağlantı rehberine](docs/shopify-setup.md) bakın. `SHOPIFY_ADMIN_ACCESS_TOKEN` gizlidir; asla GitHub'a commit etmeyin, tarayıcıya göndermeyin veya sohbette paylaşmayın.
+Mevcut prototip ve migration dokümanları `shopify-app-migration` dalındadır. Ana `main` dalı korunmaktadır.
 
-## Mevcut durum
-İlk CRM arayüz prototipi GitHub'a eklendi. Ürün taslakları şu anda tarayıcı belleğinde tutulur; Shopify'a ürün oluşturma ve fotoğraf gönderme bağlantısı henüz etkin değildir. Shopify Admin API bağlantısı kurulup güvenli şekilde test edildikten sonra CRM'den ürün sayfası oluşturma akışı bağlanacaktır.
+## Durum
+
+- [x] Shopify embedded app mimarisi seçildi.
+- [x] Ana katalog ve medya için Shopify tek kaynak olarak belirlendi.
+- [x] Geçiş dalı ve mimari/veri modeli dokümantasyonu hazırlandı.
+- [ ] Resmi React Router şablonu depoya alındı.
+- [ ] DivaViva Studio UI embedded Admin içine taşındı.
+- [ ] Güvenli ürün + medya oluşturma akışı test edildi.
+- [ ] Test mağazası ve ardından `divaviva.store` kurulumu tamamlandı.
