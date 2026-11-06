@@ -1,27 +1,57 @@
-# Shopify bağlantısı — divaviva.store
+# Shopify uygulama kurulumu — DivaViva
 
-CRM, ana ürün kaynağı olarak Shopify mağazasını kullanır. CRM'den oluşturulan kayıtlar ilk etapta Shopify'da **DRAFT** (taslak) durumunda açılır. Ürün fotoğrafları Shopify'ın kendi medya depolamasına yüklenir.
+DivaViva Studio, `divaviva.store` mağazasında Shopify Admin içine gömülü bir uygulama olacaktır. Bu nedenle eski tip, Shopify Admin'den önceden üretilen kalıcı Admin API token'ı yaklaşımını kullanmıyoruz. Yeni uygulamalar için bu uygulama türü artık oluşturulamıyor ve embedded App Bridge desteği sağlamıyor.
 
-## Shopify özel uygulaması oluşturma
+## Kullanılacak altyapı
 
-1. Shopify yöneticisinde **Settings → Apps and sales channels → Develop apps** bölümünü açın. (İlk kullanımda özel uygulama geliştirmeyi etkinleştirmeniz istenebilir.)
-2. **Create an app** ile örneğin `DivaViva CRM` adında uygulama oluşturun.
-3. **Configuration → Admin API integration** bölümünde yalnızca gerekli kapsamı etkinleştirin: `read_products`, `write_products` ve `write_files`. Shopify ürün medya yönetimi bu izinleri gerektirir.
-4. Uygulamayı **Install app** ile mağazaya kurun.
-5. Admin API access token'ı alın. Bu token bir parola gibi gizlidir.
+Shopify'ın resmi React Router uygulama şablonu:
 
-## Hosting ortam değişkenleri
+```bash
+shopify app init --template=https://github.com/Shopify/shopify-app-template-react-router
+```
 
-Hosting sağlayıcısının Environment Variables / Secrets bölümüne ekleyin:
+Resmi dokümantasyon:
+- React Router uygulama paketi: https://shopify.dev/docs/api/shopify-app-react-router/latest
+- Geliştirme ve CLI: https://shopify.dev/docs/apps/build/scaffold-app
+- Özel dağıtım: https://shopify.dev/docs/apps/launch/distribution
+- İstek doğrulama: https://shopify.dev/docs/apps/build/security/app-server/authenticate-every-request
 
-- `SHOPIFY_STORE_DOMAIN`: mağazanın gerçek `xxxx.myshopify.com` alan adı. Özel alan adı `divaviva.store` değil, Shopify'ın verdiği myshopify alan adı kullanılmalı.
-- `SHOPIFY_ADMIN_ACCESS_TOKEN`: uygulamanın Admin API access token'ı.
-- `SHOPIFY_API_VERSION`: `2026-10`.
+## Dağıtım tercihi
 
-Token'ı GitHub'a commit etmeyin, tarayıcıya koymayın veya sohbet mesajı olarak göndermeyin. Yalnızca hosting ortamının gizli değişken alanına girin.
+İlk sürüm yalnızca DivaViva'nın kendi Shopify mağazasında kullanılacağı için **Custom distribution / Single merchant** hedefleniyor. Bu dağıtım türü App Store incelemesi gerektirmez; ancak Shopify'ın uygulama faturalandırma sistemiyle ücret alma özelliği yoktur. Dağıtım seçimi sonradan değiştirilemediği için üretim uygulaması oluşturulurken bu karar bilinçli verilmelidir.
 
-## CRM akışı
+## Kimlik doğrulama ve API
 
-`POST /api/shopify/products` endpoint'i ürün adı/kodu, açıklama, kategori, etiketler, web fiyatı ve fotoğrafları alır; fotoğrafları Shopify staged upload ile gönderir ve ürünü taslak olarak oluşturur.
+- Shopify CLI uygulama kaydı ve geliştirme yapılandırmasını yönetir.
+- Embedded Admin istekleri `authenticate.admin(request)` ile doğrulanır.
+- Admin GraphQL API çağrıları, doğrulanmış istekten dönen `admin.graphql(...)` istemcisiyle sunucu tarafında yapılır.
+- Oturumlar resmi şablonun session storage çözümüyle saklanır.
+- Webhook'lar `authenticate.webhook(request)` ile doğrulanır.
+- Uygulama route'ları, Shopify Admin layout/auth sınırının dışında bırakılmamalıdır; webhook route'ları ise ayrı tutulmalıdır.
 
-Mevcut arayüzde fotoğraflar örnek olarak ikili gruplara ayrılır ve ürün adları demo amaçlı oluşturulur. Gerçek ürün gruplama, ürün adı/varyant editörü, stok güncellemesi ve düzenleme sonrası Shopify'a senkronizasyon sonraki geliştirme adımlarıdır. Ürün oluşturma bağlantısı henüz gerçek mağaza kimlik bilgileriyle test edilmemiştir.
+## Gerekli başlangıç kapsamları
+
+İlk ürün hazırlama aşamasında yalnızca ürün okuma/yazma izinleri istenir. Medya yükleme işlemi için gereken Files kapsamı, seçilen GraphQL medya mutasyonunun güncel dokümantasyonundan doğrulanarak eklenecek. Stok senkronizasyonu başladığında inventory kapsamları ayrıca eklenir. Gereksiz izin istenmez.
+
+## Ortam değişkenleri
+
+Shopify CLI tarafından oluşturulan uygulama yapılandırması ve yerel `.env` dosyası kullanılacaktır. Beklenen anahtarlar şunlardır (değerleri Shopify CLI / Dev Dashboard sağlar):
+
+- `SHOPIFY_API_KEY`
+- `SHOPIFY_API_SECRET`
+- `SHOPIFY_APP_URL`
+- `SCOPES` (veya `shopify.app.toml` içindeki access scopes)
+
+Bunlar secret olarak tutulmalı; gerçek değerler GitHub'a veya sohbet mesajlarına yazılmamalıdır. Admin API access token'ı elle kopyalanıp `SHOPIFY_ADMIN_ACCESS_TOKEN` adıyla saklanmayacaktır.
+
+## Yerel geliştirme
+
+```bash
+shopify app dev
+```
+
+CLI giriş, mağaza/uygulama seçimi, geliştirme tüneli ve gerekli ortam ayarlarında yol gösterir. Önce development store üzerinde test edilir; sonra DivaViva mağazasına custom distribution yoluyla kurulur.
+
+## Mevcut eski prototip hakkında
+
+Bu depodaki mevcut Next.js endpoint'i `app/api/shopify/products/route.ts` sabit bir Admin API token'ı varsayar ve Shopify Admin oturumunu doğrulamaz. Bu nedenle **canlıya açılmamalı ve yeni embedded uygulamada kullanılmamalıdır**. Resmi React Router şablonuna geçerken bu endpoint, `authenticate.admin` ile korunan bir action/route olarak yeniden yazılacaktır.
